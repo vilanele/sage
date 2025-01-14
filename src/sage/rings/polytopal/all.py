@@ -1,0 +1,2 @@
+from sage.rings.polytopal.polytopal_algebra import PolytopalAlgebra
+from sage.rings.polytopal.polytopal_algebra_element import PolytopalAlgebraElement

@@ -168,3 +168,6 @@ from sage.rings.asymptotic.all import *
 
 # Register classes in numbers abc
 from sage.rings import numbers_abc
+
+# polytopal algebras
+from sage.rings.polytopal.all import *
