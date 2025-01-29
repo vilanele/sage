@@ -2,17 +2,18 @@ from sage.categories.algebras import Algebras
 from sage.geometry.polyhedral_complex import Polyhedron
 from sage.rings.polytopal.multi_tate_algebra_element import MultiTateAlgebraElement
 from sage.structure.unique_representation import UniqueRepresentation
-from sage.structure.element import Element
+# from sage.structure.element import Element
 from sage.structure.parent import Parent
 from sage.rings.all import PolynomialRing
 from sage.modules.free_module_element import vector
 from sage.rings.polytopal.polytopal_algebra_element import PolytopalAlgebraElement
 from sage.rings.polynomial.polydict import PolyDict
+from sage.geometry.cone_catalog import nonnegative_orthant
 
 
 class MultiTateAlgebra(Parent, UniqueRepresentation):
-    def __init__(self, field, vertices, p, names, order="degrevlex"):
-        self._p = p
+    def __init__(self, field, vertices, names, order="degrevlex"):
+        # self._p = p
         self._field = field
         self._vertices = vertices
         self._names = names
@@ -20,6 +21,7 @@ class MultiTateAlgebra(Parent, UniqueRepresentation):
         self.element_class = MultiTateAlgebraElement
         self._polynomial_ring = PolynomialRing(field, names, order=order)
         self._ngens = self._polynomial_ring.ngens()
+        self._quadrant = nonnegative_orthant(self._ngens).polyhedron()
         Parent.__init__(self, category=Algebras(field).Commutative())
 
     def gens(self):
@@ -48,4 +50,17 @@ class MultiTateAlgebra(Parent, UniqueRepresentation):
             return True
         else:
             return False
+
+    # Compute V_i as a cone
+    def V(self,i):
+        ieqs = []
+        for v in self._vertices[:i] + self._vertices[i+1:]:
+            a = tuple(vector(self._vertices[i]) - vector(v))
+            ieqs.append((0,) + a)
+
+        return Polyhedron(ieqs=ieqs).intersection(self._quadrant)
+
+
+
+
 

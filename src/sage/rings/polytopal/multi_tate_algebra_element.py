@@ -3,7 +3,7 @@ from sage.rings.padics.factory import Qp
 from sage.geometry.polyhedral_complex import Polyhedron
 # from sage.rings.polytopal.polytopal_terms import PolytopalAlgebraTerm
 from sage.structure.unique_representation import UniqueRepresentation
-from sage.structure.element import Element, CommutativeAlgebraElement
+from sage.structure.element import  CommutativeAlgebraElement
 from sage.modules.all import vector
 from sage.arith.misc import valuation
 from sage.rings.polynomial.polydict import PolyDict
