@@ -54,4 +54,13 @@ class MultiTateAlgebraElement(CommutativeAlgebraElement):
     def terms(self):
         return [ MultiTateAlgebraTerm(self.parent(), c, e)  for e,c in self._poly.dict().items()]
         
+    def T(self,i):
+        ieqs = []
+        vertices = self.parent()._vertices
+        for v in vertices[:i] + vertices[i + 1 :]:
+            a = tuple(vector(self._vertices[i]) - vector(v))
+            ieqs.append((0,) + a)
+
+        return Polyhedron(ieqs=ieqs).intersection(self._quadrant)
+         
 

@@ -2,13 +2,16 @@ from sage.categories.algebras import Algebras
 from sage.geometry.polyhedral_complex import Polyhedron
 from sage.rings.polytopal.multi_tate_algebra_element import MultiTateAlgebraElement
 from sage.structure.unique_representation import UniqueRepresentation
+
 # from sage.structure.element import Element
 from sage.structure.parent import Parent
 from sage.rings.all import PolynomialRing
 from sage.modules.free_module_element import vector
 from sage.rings.polytopal.polytopal_algebra_element import PolytopalAlgebraElement
 from sage.rings.polynomial.polydict import PolyDict
+from sage.geometry.cone import Cone
 from sage.geometry.cone_catalog import nonnegative_orthant
+from sage.geometry.fan import Fan
 
 
 class MultiTateAlgebra(Parent, UniqueRepresentation):
@@ -22,6 +25,9 @@ class MultiTateAlgebra(Parent, UniqueRepresentation):
         self._polynomial_ring = PolynomialRing(field, names, order=order)
         self._ngens = self._polynomial_ring.ngens()
         self._quadrant = nonnegative_orthant(self._ngens).polyhedron()
+        self._negquadrant = Polyhedron(
+            rays=[tuple(-1 * vector(ray)) for ray in self._quadrant.rays()]
+        )
         Parent.__init__(self, category=Algebras(field).Commutative())
 
     def gens(self):
@@ -52,15 +58,23 @@ class MultiTateAlgebra(Parent, UniqueRepresentation):
             return False
 
     # Compute V_i as a cone
-    def V(self,i):
+    def V(self, i):
         ieqs = []
-        for v in self._vertices[:i] + self._vertices[i+1:]:
+        for v in self._vertices[:i] + self._vertices[i + 1 :]:
             a = tuple(vector(self._vertices[i]) - vector(v))
             ieqs.append((0,) + a)
 
         return Polyhedron(ieqs=ieqs).intersection(self._quadrant)
 
+    def fan(self):
+        cones = []
+        for i in range(len(self._vertices)):
+            cones.append(Cone(self.V(i)))
 
+        return Fan(cones=cones)
 
-
-
+    def polyhedron(self):
+        return Polyhedron(
+            vertices=self._vertices,
+            rays=self._negquadrant.rays(),
+        )
