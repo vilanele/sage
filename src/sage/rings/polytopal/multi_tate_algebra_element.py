@@ -7,13 +7,14 @@ from sage.structure.element import Element, CommutativeAlgebraElement
 from sage.modules.all import vector
 from sage.arith.misc import valuation
 from sage.rings.polynomial.polydict import PolyDict
+from sage.rings.polytopal.multi_tate_terms import MultiTateAlgebraTerm
 
 
 # %%
-class PolytopalAlgebraElement(CommutativeAlgebraElement):
+class MultiTateAlgebraElement(CommutativeAlgebraElement):
     def __init__(self, parent, x=None):
         CommutativeAlgebraElement.__init__(self, parent)
-        if isinstance(x, PolytopalAlgebraElement):
+        if isinstance(x, MultiTateAlgebraElement):
             if x.parent() == parent:
                 self._poly = PolyDict(x._poly.dict())
             else:
@@ -50,39 +51,7 @@ class PolytopalAlgebraElement(CommutativeAlgebraElement):
     def _repr_(self):
         return self.parent()._names[0]
 
-    # def valr(self, r):
-    #     return min(
-    #         [
-    #             valuation(c, self.parent._p) - vector(r).dot_product(vector(e))
-    #             for (e, c) in self.poly.dict().items()
-    #         ]
-    #     )
-    #
-    # def vali(self, i):
-    #     return self.valr(self.parent._polyhedron.vertices()[i])
-    #
-    # def valP(self):
-    #     polyhedron = self.parent._polyhedron
-    #     return min([self.valr(r) for r in polyhedron.vertices()])
-    #
-    # def inP(self):
-    #     return sum(
-    #         [
-    #             c * m
-    #             for (c, m) in self.poly
-    #             if self.__class__(self.parent, c * m).valP() == self.valP()
-    #         ]
-    #     )
-    #
-    # def Gi(self, i):
-    #     polyhedron = self.parent._polyhedron
-    #     r = polyhedron.vertices()[i]
-    #     print(f"r: {r}")
-    #     V = polyhedron.vertices()[:i] + polyhedron.vertices()[i + 1 :]
-    #     print(f"V: {V}")
-    #     ieqs = [
-    #         [self.valr(v) - self.valr(r)] + list(vector(v) - vector(r))
-    #         for (j, v) in enumerate(V)
-    #     ]
-    #     print(ieqs)
-    #     return self.parent._port.intersection(Polyhedron(ieqs=ieqs))
+    def terms(self):
+        return [ MultiTateAlgebraTerm(self.parent(), c, e)  for e,c in self._poly.dict().items()]
+        
+

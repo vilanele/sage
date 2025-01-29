@@ -1,5 +1,6 @@
 from sage.categories.algebras import Algebras
 from sage.geometry.polyhedral_complex import Polyhedron
+from sage.rings.polytopal.multi_tate_algebra_element import MultiTateAlgebraElement
 from sage.structure.unique_representation import UniqueRepresentation
 from sage.structure.element import Element
 from sage.structure.parent import Parent
@@ -9,19 +10,16 @@ from sage.rings.polytopal.polytopal_algebra_element import PolytopalAlgebraEleme
 from sage.rings.polynomial.polydict import PolyDict
 
 
-class PolytopalAlgebra(Parent, UniqueRepresentation):
-    def __init__(self, field, polyhedron, p, names, order="degrevlex"):
+class MultiTateAlgebra(Parent, UniqueRepresentation):
+    def __init__(self, field, vertices, p, names, order="degrevlex"):
         self._p = p
         self._field = field
-        self._polyhedron = polyhedron
+        self._vertices = vertices
         self._names = names
         self._order = order
-        self.element_class = PolytopalAlgebraElement
+        self.element_class = MultiTateAlgebraElement
         self._polynomial_ring = PolynomialRing(field, names, order=order)
         self._ngens = self._polynomial_ring.ngens()
-        # self._port = Polyhedron(
-        #     rays=[[1 if i == j else 0 for i in range(self._n)] for j in range(self._n)]
-        # )
         Parent.__init__(self, category=Algebras(field).Commutative())
 
     def gens(self):
@@ -50,14 +48,4 @@ class PolytopalAlgebra(Parent, UniqueRepresentation):
             return True
         else:
             return False
-
-    #
-    # def Ui(self, i):
-    #     r = self._polyhedron.vertices()[i]
-    #     print(f"r: {r}")
-    #     V = self._polyhedron.vertices()[:i] + self._polyhedron.vertices()[i + 1 :]
-    #     print(f"V: {V}")
-    #     ieqs = [[0] + list(vector(v) - vector(r)) for v in V]
-    #     print(ieqs)
-    #     return self._port.intersection(Polyhedron(ieqs=ieqs))
 
