@@ -27,6 +27,18 @@ class MultiTateAlgebraElement(CommutativeAlgebraElement):
         else:
             # print("Sstrange")
             pass
+
+    def _valP(self):
+        return min([self.val_at(i) for i in range(self.parent()._vertices)])
+
+    def val(self,r, check=False):
+        pass
+
+    def val_at(self,i=None):
+        if i is None:
+            return self._valP()
+
+        return min([t.val_at(i) for t in self.terms()])
             
     def _add_(self, other):
         ans = self.__class__(self.parent())
@@ -54,13 +66,23 @@ class MultiTateAlgebraElement(CommutativeAlgebraElement):
     def terms(self):
         return [ MultiTateAlgebraTerm(self.parent(), c, e)  for e,c in self._poly.dict().items()]
         
-    def T(self,i):
-        ieqs = []
-        vertices = self.parent()._vertices
-        for v in vertices[:i] + vertices[i + 1 :]:
-            a = tuple(vector(self._vertices[i]) - vector(v))
-            ieqs.append((0,) + a)
+    def T(self,i=None):
 
-        return Polyhedron(ieqs=ieqs).intersection(self._quadrant)
+        vertices = self.parent()._vertices
+        if i is None:
+            P = []
+            for j in range(len(vertices)):
+                P.append(self.T(j))
+            return P
+
+
+        ieqs = []
+        for j in [k for k in range(len(vertices)) if k != i]:
+            v = vertices[j] 
+            a = tuple(vector(vertices[i]) - vector(v))
+            c = self.val_at(i) - self.val_at(j)
+            ieqs.append((c,) + a)
+
+        return Polyhedron(ieqs=ieqs).intersection(self.parent()._quadrant)
          
 
