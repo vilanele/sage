@@ -17,7 +17,7 @@ class MultiTateAlgebraTerm(MonoidElement):
         return self._exponent
 
     def monomial(self):
-        return self.__class__(self._parent, self._parent._field(1), self._exponent)
+        return self.__class__(self.parent(), self.parent()._field(1), self._exponent)
 
     # Return P-valuation
     def _valP(self):

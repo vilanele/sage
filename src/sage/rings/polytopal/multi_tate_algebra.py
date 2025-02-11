@@ -8,10 +8,12 @@ from sage.structure.parent import Parent
 from sage.rings.all import PolynomialRing
 from sage.modules.free_module_element import vector
 from sage.rings.polytopal.polytopal_algebra_element import PolytopalAlgebraElement
-from sage.rings.polynomial.polydict import PolyDict
+from sage.rings.polynomial.polydict import PolyDict, ETuple
 from sage.geometry.cone import Cone
 from sage.geometry.cone_catalog import nonnegative_orthant
 from sage.geometry.fan import Fan
+
+import random, itertools
 
 
 class MultiTateAlgebra(Parent, UniqueRepresentation):
@@ -38,6 +40,15 @@ class MultiTateAlgebra(Parent, UniqueRepresentation):
             for i in range(self._ngens)
         )
 
+    def random_element(self, n_exps, n_max):
+        n = self._ngens
+        poly = {}
+        for i in range(n_exps):
+            poly[tuple(random.randint(0,n_max) for t in range(n))] = self._field.random_element()
+    
+        return self.element_class(self, PolyDict(poly))
+
+        
     def one(self):
         return self.element_class(self, PolyDict({(0,) * self._ngens: 1}))
 
