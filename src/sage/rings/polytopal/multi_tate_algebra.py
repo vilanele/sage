@@ -18,9 +18,9 @@ import random, itertools
 
 class MultiTateAlgebra(Parent, UniqueRepresentation):
     def __init__(self, field, vertices, names, order="degrevlex"):
-        # self._p = p
         self._field = field
         self._vertices = vertices
+        self._nvertices = len(vertices)
         self._names = names
         self._order = order
         self.element_class = MultiTateAlgebraElement
@@ -48,7 +48,6 @@ class MultiTateAlgebra(Parent, UniqueRepresentation):
     
         return self.element_class(self, PolyDict(poly))
 
-        
     def one(self):
         return self.element_class(self, PolyDict({(0,) * self._ngens: 1}))
 

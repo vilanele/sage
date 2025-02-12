@@ -31,50 +31,62 @@ class MultiTateAlgebraElement(CommutativeAlgebraElement):
             # print("Sstrange")
             pass
 
-    def _valP(self):
-        return min([self.val_at(i) for i in range(self.parent()._vertices)])
-
-    def val(self, r, check=False):
-        pass
-
-    def val_at(self, i=None):
-        if i is None:
-            return self._valP()
-
+    # The valuation at vertex i
+    def val_at(self, i):
         return min([t.val_at(i) for t in self.terms()])
 
+    # The initial part at vertex i
+    def initial_at(self, i):
+        return sum([t for t in self.terms() if t.val_at(i) == self.val_at(i)])
+
+    # Return the P valuation and optionally the list of indices at which it is reached.
+    def valP(self, indices=False):
+        valvec = [self.val_at(i) for i in range(self.parent()._nvertices)]
+        m = min(valvec)
+        if not indices:
+            return m
+        else:
+            return [i for i, v in enumerate(valvec) if v == m]
+
+    # The initial part for the order on indices
+    def initial(self):
+        i = min(self._valP(indices=True))
+        return self.initial_at(i)
+
+    # The leading monomial
     def lm(self):
-        pass
+        i = min(self._valP(indices=True))
+        ini = self.initial_at(i)
+        return 1
 
+    # The leading coefficient
     def lc(self):
-        pass
+        i = min(self._valP(indices=True))
+        ini = self.initial_at(i)
+        return 1
 
+    # The leading term
     def lt(self):
-        pass
+        return self.lc() * self.lm()
 
+
+    # The leading monomial at vertex i
     def lm_at(self, i=None):
         if i is None:
             return self.lm()
 
         m = min(t.val_at(i) for t in self.terms())
-        print(m)
         terms = [t for t in self.terms() if t.val_at(i) == m]
-        print(terms)
         return terms[0].monomial()
 
+    # The leading coefficient at vertex i
     def lc_at(self):
         pass
 
+    # The leading term at vertex i
     def lt_at(self):
         pass
 
-    def initial(self):
-        pass
-
-    def initial_at(self, i=None):
-        if i is None:
-            return 0
-        
     def _add_(self, other):
         ans = self.__class__(self.parent())
         ans._poly = self._poly + other._poly
@@ -98,11 +110,15 @@ class MultiTateAlgebraElement(CommutativeAlgebraElement):
     def _repr_(self):
         return str(self._poly)
 
+    # All termes
     def terms(self):
         return [
             MultiTateAlgebraTerm(self.parent(), c, e)
             for e, c in self._poly.dict().items()
         ]
+
+    def monomials(self):
+        return [term.monomial() for term in self.terms()]
 
     def V(self, i=None):
         vertices = self.parent()._vertices
@@ -121,12 +137,12 @@ class MultiTateAlgebraElement(CommutativeAlgebraElement):
 
         return Polyhedron(ieqs=ieqs).intersection(self.parent()._quadrant)
 
-    def Vfull(self, i=None):
+    def lmV(self, i=None):
         vertices = self.parent()._vertices
         if i is None:
             P = []
             for j in range(len(vertices)):
-                P.append(self.Vfull(j))
+                P.append(self.lmV(j))
             return P
 
         lmi = self.lm_at(i)
