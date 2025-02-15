@@ -14,6 +14,7 @@ from sage.rings.polynomial.polydict import PolyDict, ETuple
 from sage.geometry.cone import Cone
 from sage.geometry.cone_catalog import nonnegative_orthant
 from sage.geometry.fan import Fan
+from sage.arith.misc import valuation
 
 from sage.plot.point import point
 from sage.plot.colors import Color
@@ -22,9 +23,10 @@ import random, itertools
 
 
 class PolynomialTateAlgebra(MPolynomialRing_polydict):
-    def __init__(self, field, vertices, n, names, order="degrevlex"):
+    def __init__(self, field, p, vertices, n, names, order="degrevlex"):
         MPolynomialRing_polydict.__init__(self, field, n, names, order)
         self._vertices = vertices
+        self._p = p
         self._n_vertices = len(vertices)
         self._colors = [
             Color(random.random(), random.random(), random.random())
@@ -34,6 +36,30 @@ class PolynomialTateAlgebra(MPolynomialRing_polydict):
         self._negquadrant = Polyhedron(
             rays=[tuple(-1 * vector(ray)) for ray in self._quadrant.rays()]
         )
+
+    def _Spair_at(self, f, g, i, v):
+        lcf = self.lc_at(f, i)
+        lcg = self.lc_at(g, i)
+        lmf = self.lm_at(f, i)
+        lmg = self.lm_at(g, i)
+        return (
+            lcg * self.monomial_quotient( v, lmf) * f
+            - lcf * self.monomial_quotient( v, lmg) * g
+        )
+
+    def Spairs_at(self, f, g, i):
+        return [
+            self._Spair_at(f, g, i, self({tuple(v): 1})) for v in self.generators_pair(f, g, i)
+        ]
+
+    def Spairs(self, f, g):
+        pairs = []
+        for i in range(self._n_vertices):
+            spairs = self.Spairs_at(f,g,i)
+            print(len(spairs))
+            pairs += spairs
+
+        return pairs
 
     # Compute V_i as a cone
     def V(self, i):
@@ -98,6 +124,14 @@ class PolynomialTateAlgebra(MPolynomialRing_polydict):
             backend="normaliz",
         )
 
+    def ecart1(self, f):
+        return f.total_degree() - self.lm(f).total_degree()
+
+    def ecart2(self, f, g):
+        hmon = f.monomials()
+        gmon = g.monomials()
+        return len([u for u in gmon if u not in hmon])
+
     def crible(self, f, n):
         points = []
         for a in itertools.product(range(n), repeat=self.ngens()):
@@ -138,7 +172,7 @@ class PolynomialTateAlgebra(MPolynomialRing_polydict):
 
     def generators_pair(self, f, g, i):
         return (
-            self.lmV(f, i).intersection(self.lmV(f, i)).integral_points_generators()[0]
+            self.lmV(f, i).intersection(self.lmV(g, i)).integral_points_generators()[0]
         )
 
     def fan(self):
@@ -158,7 +192,7 @@ class PolynomialTateAlgebra(MPolynomialRing_polydict):
     def val_term_at(self, t, i):
         c = t.coefficients()[0]
         m = t.exponents()[0]
-        return c.valuation() - vector(self._vertices[i]).dot_product(vector(m))
+        return valuation(c,self._p) - vector(self._vertices[i]).dot_product(vector(m))
 
     # Valuation of f at vertex i
     def val_at(self, f, i):
